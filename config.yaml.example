@@ -1,0 +1,72 @@
+# Medical Record Inspector Configuration Example
+# 复制此文件为 config.yaml 并编辑配置
+
+# 评估维度权重配置
+evaluation:
+  dimensions:
+    completeness:
+      weight: 0.25
+      threshold: 7.0
+    consistency:
+      weight: 0.25
+      threshold: 7.0
+    timeliness:
+      weight: 0.25
+      threshold: 7.0
+    standardization:
+      weight: 0.25
+      threshold: 7.0
+
+  # 默认阈值
+  thresholds:
+    severity_threshold: "medium"
+    min_overall_score: 7.0
+    min_completeness_score: 7.0
+
+# 标准病历路径配置
+standards:
+  path: "data/standard_cases"
+  # 默认标准模板（当未指定时使用）
+  default_template: null
+
+# LLM 配置
+llm:
+  model: "claude-3-5-sonnet-20240620"
+  max_tokens: 4000
+  temperature: 0.3
+  response_format: "json_object"
+
+# 缓存配置
+cache:
+  enabled: true
+  expiry_hours: 24
+  path: "data/cache"
+
+# 日志配置
+logging:
+  level: "INFO"
+  format: "%(asctime)s | %(levelname)-8s | %(name)s | %(message)s"
+  file: "logs/app.log"
+  max_bytes: 10485760  # 10MB
+  backup_count: 5
+
+# 项目配置
+project:
+  name: "Medical Record Inspector"
+  version: "1.0.0"
+  port: 8000
+  host: "0.0.0.0"
+
+# 输出配置
+output:
+  export_formats:
+    - json
+    - markdown
+    - html
+  default_export_dir: "reports"
+
+# 批量处理配置
+batch:
+  max_workers: 4
+  timeout: 300  # 秒
+  retry_count: 3

@@ -1,200 +1,330 @@
 # Medical Record Inspector
 
-A quality control tool that lets病历 "inspect" other病历
+Let病历自我审查的质控工具 - A LLM-based medical record quality control tool
 
----
+![Buy Me a Coffee](buymeacoffee.png)
+
+## Table of Contents
+
+- [Introduction](#introduction)
+- [Features](#features)
+- [Assessment Dimensions](#assessment-dimensions)
+- [Quick Start](#quick-start)
+- [Project Structure](#project-structure)
+- [API Documentation](#api-documentation)
+- [Configuration](#configuration)
+- [Development](#development)
+- [Docker Deployment](#docker-deployment)
+- [Support the Author](#support-the-author)
+- [License](#license)
 
 ## Introduction
 
-**Medical Record Inspector** is an innovative electronic medical record (EMR) quality control tool that treats EMRs as "inspectors" rather than "objects to be inspected."
-
-Traditional QC systems use predefined rules to check records (e.g., missing items, logical contradictions), but some defects are "not clearly wrong but feel wrong." This tool detects deviations in new records by comparing them against high-quality templates, uncovering blind spots that rule-based checking misses.
+Medical Record Inspector is a medical record quality control tool based on LLM (Large Language Model). It uses high-quality standard medical records as "inspectors" and compares new records with standard templates using LLM to identify defects beyond traditional rule-based checking.
 
 ### Core Features
 
-- **Sample Comparison**: Uses high-quality medical records as templates to detect deviations in new records
-- **Paragraph-Level Localization**: Precisely identifies the parts of a record that differ most from the template
-- **LLM Explanation**: Uses large language models to generate interpretable defect reports
-- **Hybrid Mode**: Supports hybrid mode combining rule-based checking and sample comparison
-- **CLI Tool**: Single record inspection or batch processing
-- **Web API**: RESTful API service for easy integration
+- **Smart QC**: Uses LLM for medical record quality assessment, going beyond traditional rule-based checks
+- **Multi-dimensional Evaluation**: Completeness, Consistency, Timeliness, Standardization
+- **Explainable Reports**: Generates detailed reports with specific issues and recommendations
+- **Batch Processing**: Supports batch processing of multiple medical record files
+- **API Service**: REST API for easy integration
+- **CLI Tool**: Command-line interface for automation
 
-### Project Structure
+### Assessment Dimensions
 
-```
-medical-record-inspector/
-├── src/              # Source code
-│   ├── extractor.py      # Text extraction module
-│   ├── template_loader.py  # Template loading module
-│   ├── embedder.py       # Text embedding module
-│   ├── similarity.py     # Similarity calculation module
-│   ├── anomaly_detector.py # Anomaly detection module
-│   ├── locator.py        # Defect localization module
-│   ├── explainer.py      # LLM explanation module
-│   ├── inspector.py      # Core inspection engine
-│   ├── cli.py            # Command-line tool
-│   ├── api.py            # Web API service
-│   ├── visualizer.py     # Result visualization module
-│   ├── hybrid_checker.py # Hybrid mode module
-│   ├── template_manager.py # Template management module
-│   ├── batch_processor.py  # Batch processing module
-│   ├── feedback.py       # User feedback module
-│   ├── config.py         # Configuration management
-│   └── logger.py         # Logging system
-├── tests/            # Test files
-├── docs/             # User documentation
-├── templates/        # High-quality record templates
-├── data/             # Example data and feedback
-│   └── samples/      # Example records
-├── requirements.txt  # Python dependencies
-├── setup.py          # Packaging configuration
-├── README.md         # This document
-├── README_EN.md      # English version (auto-generated)
-└── buymeacoffee.png  # Donation QR code
-```
-
----
+| Dimension | Description |
+|-----------|-------------|
+| Completeness | Checks if all required fields are present and information is complete |
+| Consistency | Checks logical consistency (e.g., diagnosis matches symptoms and treatment) |
+| Timeliness | Checks if examinations are performed及时 and procedures follow correct order |
+| Standardization | Checks if medical terminology and formatting are standardized |
 
 ## Quick Start
 
 ### Requirements
 
 - Python 3.9+
-- pip package manager
+- Anthropic API Key
 
 ### Installation
 
 ```bash
 cd medical-record-inspector
+
+# Create virtual environment
+python -m venv venv
+source venv/bin/activate  # Linux/Mac
+# or
+venv\Scripts\activate     # Windows
+
+# Install dependencies
 pip install -r requirements.txt
+
+# Configure API key
+cp .env.example .env
+# Edit .env and fill in your Anthropic API Key
 ```
 
 ### Usage
 
-#### 1. Command-Line Tool
+#### Start API Server
 
 ```bash
-# Inspect a single record
-python -m src.cli single path/to/record.txt
-
-# Batch inspect a folder
-python -m src.cli batch path/to(records/folder)
-
-# Use API mode
-python -m src.api --port 8000
+python -m uvicorn api.main:app --reload --port 8000
 ```
 
-#### 2. Web API Service
+Visit `http://localhost:8000/docs` to view the API documentation.
+
+#### CLI Usage
 
 ```bash
-# Start API service
-python -m src.api --port 8000
+# Check single file
+python -m cli quality_check <file>
 
-# Test the API
-curl -X POST http://localhost:8000/analyze \
-  -H "Content-Type: application/json" \
-  -d '{"text": "Record text..."}'
+# Batch checking
+python -m cli check-batch <directory>
+
+# List standard templates
+python -m cli list-standards
 ```
 
----
+## Project Structure
+
+```
+medical-record-inspector/
+├── api/                  # FastAPI service
+│   ├── main.py          # API entry point
+│   ├── models.py        # Pydantic data models
+│   ├── evaluator.py     # Quality evaluator
+│   ├── batch_engine.py  # Batch processing engine
+│   ├── exporter.py      # Report exporter
+│   ├── config.py        # Configuration management
+│   ├── config_loader.py # YAML configuration loader
+│   ├── logger.py        # Logging system
+│   └── cache.py         # Local cache system
+├── cli/                  # Command-line tools
+│   ├── __main__.py
+│   └── quality_check.py
+├── data/                 # Data files
+│   ├── standard_cases/  # Standard case templates
+│   ├── test_cases/      # Test cases
+│   ├── examples/        # Example data
+│   └── history/         # Evaluation history
+├── templates/            # LLM prompt templates
+├── generators/           # Test case generators
+├── tests/                # Unit tests
+├── docs/                 # Documentation
+├── logs/                 # Log files
+├── reports/              # Exported reports
+├── requirements.txt
+├── requirements.dev.txt
+├── .env.example
+├── config.yaml.example
+└── README_EN.md
+```
+
+## API Documentation
+
+The API is built with FastAPI and includes automatic interactive documentation.
+
+### Endpoints
+
+#### Health Check
+
+```
+GET /api/health
+```
+
+#### Quality Assessment
+
+```
+POST /api/v1/assess
+```
+
+Request Body:
+```json
+{
+  "patient_id": "PAT001",
+  "visit_id": "VIS001",
+  "department": "Internal Medicine",
+  "case_type": "Outpatient",
+  "main_complaint": "Cough for 3 days",
+  "present_illness": "Patient developed cough after cold exposure...",
+  "past_history": "No significant past history...",
+  "physical_exam": "Bilateral lung breath sounds clear...",
+  "auxiliary_exams": "CBC normal...",
+  "diagnosis": "Acute bronchitis",
+  "prescription": "Amoxicillin 0.5g tid"
+}
+```
+
+Response:
+```json
+{
+  "success": true,
+  "result": {
+    "assessment_id": "ASSESS-...",
+    "scores": {
+      "completeness_score": 8.5,
+      "consistency_score": 9.0,
+      "timeliness_score": 8.0,
+      "standardization_score": 8.5,
+      "overall_score": 8.5
+    },
+    "issues": [],
+    "report": "..."
+  }
+}
+```
+
+#### List Standard Cases
+
+```
+GET /api/v1/list-standards
+```
+
+### Interactive Documentation
+
+- Swagger UI: http://localhost:8000/docs
+- ReDoc: http://localhost:8000/redoc
 
 ## Configuration
 
-Configuration file is located at `config.yaml`, example:
+### Environment Variables
+
+```bash
+# Anthropic API Configuration
+ANTHROPIC_API_KEY=your_api_key_here
+MODEL_NAME=claude-3-5-sonnet-20240620
+LOG_LEVEL=INFO
+
+# Server Configuration
+PORT=8000
+HOST=0.0.0.0
+
+# Cache Configuration
+CACHE_EXPIRY_HOURS=24
+```
+
+### Configuration File
+
+Create `config.yaml` from `config.yaml.example`:
 
 ```yaml
-# Similarity threshold (0-1), records below this value are flagged as anomalous
-similarity_threshold: 0.7
+evaluation:
+  dimensions:
+    completeness:
+      weight: 0.25
+      threshold: 7.0
+    consistency:
+      weight: 0.25
+      threshold: 7.0
+    timeliness:
+      weight: 0.25
+      threshold: 7.0
+    standardization:
+      weight: 0.25
+      threshold: 7.0
 
-# Anomaly detection sensitivity
-anomaly_sensitivity: 0.95
-
-# LLM configuration
 llm:
-  model: gpt-4
-  api_base: https://api.openai.com/v1
-  # api_key: your_key_here  # Read from environment variable
-
-# Template library path
-template_dir: templates/
+  model: "claude-3-5-sonnet-20240620"
+  max_tokens: 4000
+  temperature: 0.3
 ```
 
----
+## Development
 
-## Template Creation
+### Running Tests
 
-Create high-quality medical record templates in the `templates/` directory:
-
-```
-templates/
-├── internal_medicine_example.txt  # Internal medicine template
-├── surgery_example.txt            # Surgery template
-└── pediatric_example.txt          # Pediatrics template
+```bash
+pytest -v
 ```
 
-Templates should include complete standard EMR structures:
+### Code Quality
 
-- Patient基本信息 (Basic patient information)
-- 主诉 (Chief complaint)
-- 现病史 (Present illness history)
-- 既往史 (Past history)
-- 体格检查 (Physical examination)
-- 辅助检查 (Auxiliary examinations)
-- 诊断 (Diagnosis)
-- 诊疗经过 (Treatment process)
-- 出院诊断 (Discharge diagnosis)
+```bash
+# Lint check
+ruff check .
 
----
+# Format code
+ruff format .
+```
 
-## Tech Stack
+### Adding Dependencies
 
-| Module | Technology |
-|--------|------------|
-| Text Processing | Python, PyPDF2, python-docx |
-| Embeddings | sentence-transformers, BAAI-bge-micro-v2 |
-| API Service | FastAPI, Uvicorn |
-| Anomaly Detection | scikit-learn, Isolation Forest |
-| LLM Calls | openai SDK |
+Add new dependencies to `requirements.txt` or `requirements.dev.txt`.
 
----
+## Docker Deployment
 
-## Project Status
+### Build Image
 
-- ✅ Phase 1: Exploration - 10 strange questions, 10 project ideas
-- ✅ Phase 1: Research - Technical feasibility assessment
-- ✅ Phase 2: Project Selection - Medical Record Inspector
-- ✅ Phase 3: Task Planning - 27 tasks
-- 🔜 Phase 4: Self Review - Project ready
-- 🔜 Phase 5: Execution - Implementation starting
+```bash
+docker build -t medical-record-inspector .
+```
 
----
+### Run Container
 
-## Related Projects
+```bash
+docker run -p 8000:8000 --env-file .env medical-record-inspector
+```
 
-This project is part of the **ChaosForge** medical information system series:
+### docker-compose.yml Example
 
-- **Malpractice Test Generator** - Generate intentionally flawed simulation records
-- **Quality Care Simulator** - Use LLM to generate perfect record examples
-- **Medical Record Inspector** - Let records self-inspect (this project)
-- **medicare-audit-game** - Gamified medicare reconciliation tool
-- **重复上报扫描仪** - GRA reporting efficiency checker
+```yaml
+version: '3.8'
+services:
+  medical-record-inspector:
+    build: .
+    ports:
+      - "8000:8000"
+    env_file:
+      - .env
+    volumes:
+      - ./data:/app/data
+      - ./logs:/app/logs
+```
 
----
+## Support the Author
 
-*Last updated: 2026-03-18*
-
----
-
-## Support Author
-
-If you find this project helpful, welcome to support me!
+If you find this project helpful, please consider supporting the author!
 
 ![Buy Me a Coffee](buymeacoffee.png)
 
 **Buy me a coffee (crypto)**
 
-| Coin | Address |
-|------|---------|
+| Currency | Address |
+|----------|---------|
 | BTC | `bc1qc0f5tv577z7yt59tw8sqaq3tey98xehy32frzd` |
 | ETH / USDT | `0x3b7b6c47491e4778157f0756102f134d05070704` |
 | SOL | `6Xuk373zc6x6XWcAAuqvbWW92zabJdCmN3CSwpsVM6sd` |
+
+## License
+
+MIT License
+
+## Contributing
+
+Contributions are welcome! Please open an issue or submit a pull request.
+
+## Troubleshooting
+
+### Common Issues
+
+**Issue**: `ANTHROPIC_API_KEY not found`
+
+**Solution**: Create a `.env` file and set your API key:
+```bash
+echo "ANTHROPIC_API_KEY=your_key_here" > .env
+```
+
+**Issue**: Lazy import error for `LangSegment`
+
+**Solution**: Ensure you're using a clean virtual environment:
+```bash
+python -m venv venv
+source venv/bin/activate
+pip install -r requirements.txt
+```
+
+For more help, please check the [issues](https://github.com/your-username/medical-record-inspector/issues) page.

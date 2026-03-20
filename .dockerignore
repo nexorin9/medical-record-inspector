@@ -1,0 +1,51 @@
+# Dockerignore for Medical Record Inspector
+# Exclude unnecessary files from the Docker build context
+
+# Environment files (should be mounted as volumes or passed via --env-file)
+.env
+.env.*
+
+# Virtual environments
+venv/
+.venv/
+__pycache__/
+
+# IDE and editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Git
+.git/
+.gitignore
+
+# Logs and data
+logs/
+data/cache/
+data/test_cases/*.json
+
+# Test files
+tests/
+*.pyc
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Build artifacts
+build/
+dist/
+*.egg-info/
+
+# IDE specific
+.DS_Store
+
+# Documentation (optional, uncomment if not needed in container)
+# docs/
+# README.md
+
+# Development files
+requirements.dev.txt
+start.sh
+start.bat
