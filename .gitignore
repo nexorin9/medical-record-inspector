@@ -1,23 +1,17 @@
 # Environment variables
 .env
+.env.local
+.env.*.local
+
+# Virtual environments
 venv/
 .venv/
-
-# Node modules
-node_modules/
-
-# Python cache
 __pycache__/
 *.py[cod]
 *$py.class
+.Python
 
-# Data and logs
-data/
-logs/
-tmp/
-temp/
-
-# Test cache
+# Python cache
 .pytest_cache/
 .mypy_cache/
 .ruff_cache/
@@ -25,23 +19,36 @@ temp/
 # Build artifacts
 dist/
 build/
-coverage/
-*.log
+*.egg-info/
+.eggs/
 
 # IDE
-.vscode/
 .idea/
+.vscode/
 *.swp
 *.swo
 *~
 
-# round metadata (not for project)
-score.json
-ideas.md
-research.md
+# Tests
+.pytest_cache/
+.coverage
+htmlcov/
+coverage.xml
 
-# Other
-.next/
-.nuxt/
-target/
-*.temp
+# Logs
+logs/
+*.log
+*.tmp
+temp/
+tmp/
+
+# Data (sample data can be kept)
+data/*.db
+data/*.pickle
+data/*.pkl
+
+# Project metadata
+score.json
+
+# Jupyter Notebook
+.ipynb_checkpoints
