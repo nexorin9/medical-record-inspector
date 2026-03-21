@@ -1,94 +1,60 @@
 #!/bin/bash
-
-# Medical Record Inspector Startup Script
-# Linux/Mac 启动脚本
+# =============================================================================
+# Medical Record Inspector - Start Script (Linux/Mac)
+# =============================================================================
 
 set -e
 
+echo " ======================================="
+echo "  Medical Record Inspector"
+echo "  Starting up..."
+echo " ======================================="
+
+# Get the directory where this script is located
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 cd "$SCRIPT_DIR"
 
-echo "======================================"
-echo "Medical Record Inspector 启动脚本"
-echo "======================================"
-
-# 检查 Python 是否安装
+# Check if Python is available
 if ! command -v python3 &> /dev/null; then
-    echo "错误: 未找到 Python3，请先安装 Python 3.9+"
+    echo "ERROR: Python 3 is not installed or not in PATH"
     exit 1
 fi
 
-# 检查 .env 文件是否存在
-if [ ! -f ".env" ]; then
-    echo "警告: .env 文件不存在，正在从 .env.example 创建..."
-    if [ -f ".env.example" ]; then
-        cp .env.example .env
-        echo "已创建 .env 文件，请编辑填入 API 密钥"
-        echo "ANTHROPIC_API_KEY=your_api_key_here"
-    else
-        echo "错误: .env.example 文件也不存在"
+# Create virtual environment if it doesn't exist
+VENV_DIR="${SCRIPT_DIR}/.venv"
+if [ ! -d "$VENV_DIR" ]; then
+    echo "Creating virtual environment..."
+    python3 -m venv "$VENV_DIR"
+fi
+
+# Activate virtual environment
+source "$VENV_DIR/bin/activate"
+
+# Install dependencies if requirements.txt exists
+if [ -f "${SCRIPT_DIR}/src/requirements.txt" ]; then
+    echo "Installing/updating dependencies..."
+    pip install --quiet -r "${SCRIPT_DIR}/src/requirements.txt"
+fi
+
+# Check if .env exists, create from .env.example if not
+if [ ! -f "${SCRIPT_DIR}/src/.env" ]; then
+    echo ""
+    echo "WARNING: .env file not found. Please configure your API keys."
+    echo "Copy .env.example to .env and fill in your values:"
+    echo "  cp src/.env.example src/.env"
+    echo "  # Edit src/.env with your API keys"
+    echo ""
+    read -p "Continue without .env file? (y/n) " -n 1 -r
+    echo
+    if [[ ! $REPLY =~ ^[Yy]$ ]]; then
         exit 1
     fi
 fi
 
-# 检查 ANTHROPIC_API_KEY 配置
-if ! grep -q "^ANTHROPIC_API_KEY=" .env; then
-    echo "警告: ANTHROPIC_API_KEY 未在 .env 文件中配置"
-    echo "请编辑 .env 文件填入 API 密钥"
-fi
-
-# 安装依赖（如果 requirements.txt 存在）
-if [ -f "requirements.txt" ]; then
-    echo "检查依赖..."
-    python3 -m pip install --user -r requirements.txt 2>/dev/null || {
-        echo "依赖安装失败，请手动运行: python3 -m pip install -r requirements.txt"
-    }
-fi
-
-# 解析参数
-PORT=8000
-HOST="0.0.0.0"
-
-while [[ $# -gt 0 ]]; do
-    case $1 in
-        --port|-p)
-            PORT="$2"
-            shift 2
-            ;;
-        --host|-h)
-            HOST="$2"
-            shift 2
-            ;;
-        --reload|-r)
-            RELOAD="--reload"
-            shift
-            ;;
-        --help|-h)
-            echo "用法: ./start.sh [选项]"
-            echo ""
-            echo "选项:"
-            echo "  -p, --port PORT    设置端口号 (默认: 8000)"
-            echo "  -h, --host HOST    设置主机 (默认: 0.0.0.0)"
-            echo "  -r, --reload       启用自动重载 (开发模式)"
-            echo "  --help             显示帮助信息"
-            exit 0
-            ;;
-        *)
-            echo "未知参数: $1"
-            echo "使用 --help 查看帮助"
-            exit 1
-            ;;
-    esac
-done
-
-echo "启动服务..."
-echo "  端口: $PORT"
-echo "  主机: $HOST"
-echo "  重载: ${RELOAD:-禁用}"
+# Start the backend server
+echo ""
+echo "Starting FastAPI backend server on http://localhost:8000"
+echo "Open http://localhost:8000/docs for API documentation"
 echo ""
 
-# 启动服务
-python3 -m uvicorn api.main:app \
-    --host "$HOST" \
-    --port "$PORT" \
-    ${RELOAD:---reload}
+uvicorn src.main:app --host 0.0.0.0 --port 8000 --reload
