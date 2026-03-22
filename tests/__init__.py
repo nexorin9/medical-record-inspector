@@ -1,1 +1,1 @@
-# Test Package for Medical Record Inspector
+# Tests package

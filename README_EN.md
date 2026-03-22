@@ -1,330 +1,146 @@
 # Medical Record Inspector
 
-Let病历自我审查的质控工具 - A LLM-based medical record quality control tool
+A quality control tool that enables self-review of medical records
 
-![Buy Me a Coffee](buymeacoffee.png)
+## Project Introduction
 
-## Table of Contents
-
-- [Introduction](#introduction)
-- [Features](#features)
-- [Assessment Dimensions](#assessment-dimensions)
-- [Quick Start](#quick-start)
-- [Project Structure](#project-structure)
-- [API Documentation](#api-documentation)
-- [Configuration](#configuration)
-- [Development](#development)
-- [Docker Deployment](#docker-deployment)
-- [Support the Author](#support-the-author)
-- [License](#license)
-
-## Introduction
-
-Medical Record Inspector is a medical record quality control tool based on LLM (Large Language Model). It uses high-quality standard medical records as "inspectors" and compares new records with standard templates using LLM to identify defects beyond traditional rule-based checking.
+Medical Record Inspector is an innovative medical record quality control tool that treats high-quality medical records as the "inspector" rather than the "subject being inspected". It uses LLM to compare new medical records against standard templates, identifying defects beyond traditional rule-based checks.
 
 ### Core Features
 
-- **Smart QC**: Uses LLM for medical record quality assessment, going beyond traditional rule-based checks
-- **Multi-dimensional Evaluation**: Completeness, Consistency, Timeliness, Standardization
-- **Explainable Reports**: Generates detailed reports with specific issues and recommendations
-- **Batch Processing**: Supports batch processing of multiple medical record files
-- **API Service**: REST API for easy integration
-- **CLI Tool**: Command-line interface for automation
+- **Multi-dimensional Assessment**: Automatically evaluates completeness, logic, timeliness, and standardization of medical records
+- **Explainable Reports**: Generates explainable quality reports with detailed issues and improvement suggestions
+- **Intelligent Template Matching**: Supports high-quality medical record templates for comparative assessment
+- **File Upload Support**: Supports DOCX and PDF file upload and parsing
+- **Batch Assessment**: Supports batch file evaluation and result export
+- **Multiple Export Formats**: Supports export in JSON, Markdown, and PDF formats
+
+### Technical Architecture
+
+- **Backend**: Python + FastAPI
+- **Frontend**: TypeScript + React + Vite
+- **LLM**: Supports OpenAI API and domestic large model APIs (Qwen, ERNIE Bot, etc.)
+
+### Installation and Usage
+
+See [INSTALLATION.md](INSTALLATION.md) and [USAGE.md](USAGE.md) for details.
 
 ### Assessment Dimensions
 
-| Dimension | Description |
-|-----------|-------------|
-| Completeness | Checks if all required fields are present and information is complete |
-| Consistency | Checks logical consistency (e.g., diagnosis matches symptoms and treatment) |
-| Timeliness | Checks if examinations are performed及时 and procedures follow correct order |
-| Standardization | Checks if medical terminology and formatting are standardized |
+See [EVALUATION_DIMENSIONS.md](EVALUATION_DIMENSIONS.md) for details.
 
-## Quick Start
+### Quick Start Example
 
-### Requirements
-
-- Python 3.9+
-- Anthropic API Key
-
-### Installation
+#### 1. Start the Services
 
 ```bash
-cd medical-record-inspector
+# Backend
+cd src
+uvicorn main:app --reload
 
-# Create virtual environment
-python -m venv venv
-source venv/bin/activate  # Linux/Mac
-# or
-venv\Scripts\activate     # Windows
-
-# Install dependencies
-pip install -r requirements.txt
-
-# Configure API key
-cp .env.example .env
-# Edit .env and fill in your Anthropic API Key
+# Frontend (new terminal window)
+cd frontend
+npm run dev
 ```
 
-### Usage
+#### 2. Evaluate Medical Records
 
-#### Start API Server
-
-```bash
-python -m uvicorn api.main:app --reload --port 8000
-```
-
-Visit `http://localhost:8000/docs` to view the API documentation.
-
-#### CLI Usage
-
-```bash
-# Check single file
-python -m cli quality_check <file>
-
-# Batch checking
-python -m cli check-batch <directory>
-
-# List standard templates
-python -m cli list-standards
-```
-
-## Project Structure
+Visit `http://localhost:5173` and input or paste medical record content:
 
 ```
-medical-record-inspector/
-├── api/                  # FastAPI service
-│   ├── main.py          # API entry point
-│   ├── models.py        # Pydantic data models
-│   ├── evaluator.py     # Quality evaluator
-│   ├── batch_engine.py  # Batch processing engine
-│   ├── exporter.py      # Report exporter
-│   ├── config.py        # Configuration management
-│   ├── config_loader.py # YAML configuration loader
-│   ├── logger.py        # Logging system
-│   └── cache.py         # Local cache system
-├── cli/                  # Command-line tools
-│   ├── __main__.py
-│   └── quality_check.py
-├── data/                 # Data files
-│   ├── standard_cases/  # Standard case templates
-│   ├── test_cases/      # Test cases
-│   ├── examples/        # Example data
-│   └── history/         # Evaluation history
-├── templates/            # LLM prompt templates
-├── generators/           # Test case generators
-├── tests/                # Unit tests
-├── docs/                 # Documentation
-├── logs/                 # Log files
-├── reports/              # Exported reports
-├── requirements.txt
-├── requirements.dev.txt
-├── .env.example
-├── config.yaml.example
-└── README_EN.md
+Chief Complaint: Headache for 3 days, accompanied by nausea and vomiting.
+Current Illness History: The patient developed headache without obvious诱因 3 days ago, presenting as persistent dull pain...
+Past Medical History: Denies history of hypertension and diabetes.
+Physical Examination: Conscious, no obvious neurological abnormalities.
+Preliminary Diagnosis: Migraine
 ```
 
-## API Documentation
+Select assessment dimensions and click "Start Assessment" to view results.
 
-The API is built with FastAPI and includes automatic interactive documentation.
+#### 3. File Assessment
 
-### Endpoints
+Supports DOCX and PDF file uploads with automatic text extraction for assessment.
 
-#### Health Check
+#### 4. Batch Assessment
 
-```
-GET /api/health
-```
+Select multiple files for batch evaluation, viewing assessment progress and results for each file.
 
-#### Quality Assessment
+## Screenshot Documentation
 
-```
-POST /api/v1/assess
-```
+The project includes screenshots of key interfaces (stored in the `screenshots/` directory):
 
-Request Body:
-```json
-{
-  "patient_id": "PAT001",
-  "visit_id": "VIS001",
-  "department": "Internal Medicine",
-  "case_type": "Outpatient",
-  "main_complaint": "Cough for 3 days",
-  "present_illness": "Patient developed cough after cold exposure...",
-  "past_history": "No significant past history...",
-  "physical_exam": "Bilateral lung breath sounds clear...",
-  "auxiliary_exams": "CBC normal...",
-  "diagnosis": "Acute bronchitis",
-  "prescription": "Amoxicillin 0.5g tid"
-}
-```
+| Screenshot | Description |
+|------------|-------------|
+| `main-interface.png` | Main interface - input area and result display |
+| `evaluation-result.png` | Assessment results - overall score, dimension scores, issue list, improvement suggestions |
+| `file-upload.png` | File upload - supports DOCX and PDF file uploads |
+| `batch-evaluation.png` | Batch assessment - multi-file assessment progress display |
 
-Response:
-```json
-{
-  "success": true,
-  "result": {
-    "assessment_id": "ASSESS-...",
-    "scores": {
-      "completeness_score": 8.5,
-      "consistency_score": 9.0,
-      "timeliness_score": 8.0,
-      "standardization_score": 8.5,
-      "overall_score": 8.5
-    },
-    "issues": [],
-    "report": "..."
-  }
-}
-```
+### How to Add Screenshots
 
-#### List Standard Cases
+1. Start the project:
+   ```bash
+   # Backend (Terminal 1)
+   cd src
+   uvicorn main:app --reload
 
-```
-GET /api/v1/list-standards
-```
+   # Frontend (Terminal 2)
+   cd frontend
+   npm run dev
+   ```
 
-### Interactive Documentation
+2. Visit `http://localhost:5173` and use the various features
 
-- Swagger UI: http://localhost:8000/docs
-- ReDoc: http://localhost:8000/redoc
+3. Capture the following key pages:
+   - Main interface (input box + assessment results)
+   - Assessment result details
+   - File upload functionality
+   - Batch assessment progress
 
-## Configuration
+4. Save screenshots to the `screenshots/` directory:
+   ```
+   medical-record-inspector/
+   └── screenshots/
+       ├── main-interface.png
+       ├── evaluation-result.png
+       ├── file-upload.png
+       └── batch-evaluation.png
+   ```
 
-### Environment Variables
+5. Update image paths in this section if needed
 
-```bash
-# Anthropic API Configuration
-ANTHROPIC_API_KEY=your_api_key_here
-MODEL_NAME=claude-3-5-sonnet-20240620
-LOG_LEVEL=INFO
+### Screenshot Requirements
 
-# Server Configuration
-PORT=8000
-HOST=0.0.0.0
+- **Format**: PNG / JPG
+- **Size**: Suggested width 800-1200 pixels
+- **Clarity**: Maintain readable interface clarity
+- **Naming**: Use English description with lowercase letters and hyphens
 
-# Cache Configuration
-CACHE_EXPIRY_HOURS=24
-```
+### Screenshot Content Details
 
-### Configuration File
+| Screenshot | Key Content Displayed |
+|------------|----------------------|
+| Main Interface | Responsive layout, theme switching, input area |
+| Assessment Results | Circular progress bar, bar chart, issue list, severity coloring |
+| File Upload | DOCX/PDF support, file preview, progress status |
+| Batch Assessment | Progress bar, completion/failure counts, list display |
 
-Create `config.yaml` from `config.yaml.example`:
+### License
 
-```yaml
-evaluation:
-  dimensions:
-    completeness:
-      weight: 0.25
-      threshold: 7.0
-    consistency:
-      weight: 0.25
-      threshold: 7.0
-    timeliness:
-      weight: 0.25
-      threshold: 7.0
-    standardization:
-      weight: 0.25
-      threshold: 7.0
+MIT License
 
-llm:
-  model: "claude-3-5-sonnet-20240620"
-  max_tokens: 4000
-  temperature: 0.3
-```
-
-## Development
-
-### Running Tests
-
-```bash
-pytest -v
-```
-
-### Code Quality
-
-```bash
-# Lint check
-ruff check .
-
-# Format code
-ruff format .
-```
-
-### Adding Dependencies
-
-Add new dependencies to `requirements.txt` or `requirements.dev.txt`.
-
-## Docker Deployment
-
-### Build Image
-
-```bash
-docker build -t medical-record-inspector .
-```
-
-### Run Container
-
-```bash
-docker run -p 8000:8000 --env-file .env medical-record-inspector
-```
-
-### docker-compose.yml Example
-
-```yaml
-version: '3.8'
-services:
-  medical-record-inspector:
-    build: .
-    ports:
-      - "8000:8000"
-    env_file:
-      - .env
-    volumes:
-      - ./data:/app/data
-      - ./logs:/app/logs
-```
+---
 
 ## Support the Author
 
-If you find this project helpful, please consider supporting the author!
+If you find this project helpful, welcome to support with a donation!
 
 ![Buy Me a Coffee](buymeacoffee.png)
 
 **Buy me a coffee (crypto)**
 
-| Currency | Address |
-|----------|---------|
+| Cryptocurrency | Address |
+|----------------|---------|
 | BTC | `bc1qc0f5tv577z7yt59tw8sqaq3tey98xehy32frzd` |
 | ETH / USDT | `0x3b7b6c47491e4778157f0756102f134d05070704` |
 | SOL | `6Xuk373zc6x6XWcAAuqvbWW92zabJdCmN3CSwpsVM6sd` |
-
-## License
-
-MIT License
-
-## Contributing
-
-Contributions are welcome! Please open an issue or submit a pull request.
-
-## Troubleshooting
-
-### Common Issues
-
-**Issue**: `ANTHROPIC_API_KEY not found`
-
-**Solution**: Create a `.env` file and set your API key:
-```bash
-echo "ANTHROPIC_API_KEY=your_key_here" > .env
-```
-
-**Issue**: Lazy import error for `LangSegment`
-
-**Solution**: Ensure you're using a clean virtual environment:
-```bash
-python -m venv venv
-source venv/bin/activate
-pip install -r requirements.txt
-```
-
-For more help, please check the [issues](https://github.com/your-username/medical-record-inspector/issues) page.
