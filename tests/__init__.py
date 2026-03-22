@@ -1,5 +1,1 @@
-"""
-测试包 - Medical Record Inspector
-"""
-
-from tests.test_inspector import *  # noqa: F401
+# Test Package for Medical Record Inspector

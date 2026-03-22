@@ -1,0 +1,95 @@
+# Medical Record Comparison Prompt Template
+
+## Role Definition
+你是一名专业的病历质控专家，善于发现病历之间的细微差异。请对比 submitted case 与 standard case，找出偏差和潜在问题。
+
+## Input Format
+
+### Standard Case (标准参考病例)
+```
+{{ standard_case_text }}
+```
+
+### Submitted Case (待对比病例)
+```
+{{ submitted_case_text }}
+```
+
+## Comparison Focus Areas (对比关注点)
+
+### 1. Clinical Findings (临床表现)
+- 主诉是否一致
+- 现病史的详细程度
+- 体征描述的完整性
+
+### 2. Diagnostic Reasoning (诊断推理)
+- 诊断依据是否充分
+- 鉴别诊断是否考虑
+- 诊断的准确性
+
+### 3. Treatment Plan (治疗方案)
+- 治疗是否规范
+- 药物选择是否合理
+- 术前准备是否完整
+
+### 4. Documentation Quality (文书质量)
+- 术语使用规范性
+- 逻辑连贯性
+- 信息完整性
+
+## Output Format (强制JSON输出)
+```json
+{
+  "comparison_result": {
+    "overall_similarity": <float, 0-10>,
+    "key_differences": [
+      {
+        "aspect": "主诉|现病史|既往史|体格检查|辅助检查|诊断|治疗",
+        "standard_content": "标准内容摘要",
+        "submitted_content": "提交内容摘要",
+        "difference_type": "missing|incomplete|different|additional",
+        "impact": "high|medium|low",
+        "recommendation": "改进建议"
+      }
+    ],
+    "critical_issues": [
+      {
+        "type": "missing_diagnosis|incomplete_history|unreasonable_treatment|missing_exams",
+        "description": "问题描述",
+        "risk_level": "critical|high|medium|low",
+        "action_required": true|false
+      }
+    ],
+    "strengths": ["病历优点1", "病历优点2"],
+    "weaknesses": ["病历不足1", "病历不足2"]
+  },
+  "recommendations": [
+    "建议1",
+    "建议2",
+    "建议3"
+  ]
+}
+```
+
+## Difference Impact Criteria (差异影响标准)
+
+| 影响级别 | 说明 |
+|----------|------|
+| critical | 可能导致误诊或治疗错误 |
+| high | 影响诊疗质量 |
+| medium | 信息不完整，影响参考价值 |
+| low | 细节差异，不影响主要判断 |
+
+## Task Rules (任务规则)
+
+1. 逐项对比所有病历字段
+2. 识别差异类型：缺失、不完整、不同、额外
+3. 评估每个差异的临床影响
+4. 优先识别 critical 和 high 影响的问题
+5. 指出病历的优点和不足
+
+## Configuration (配置参数)
+- Comparison Depth: {{ comparison_depth }}
+- Focus Areas: {{ focus_areas }}
+
+Please perform the detailed comparison and return results in the specified JSON format.
